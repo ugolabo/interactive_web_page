@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pixel Art</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Audiowide&text=Pixel%Art%Maker">
+  <link rel="stylesheet" href="iwp.css">
+</head>
+<body onload="startApp()"> <!--when loading, make the default grid-->
+  <div>
+      <h1 class="mainTitle">Pixel Art</h1>
+      <form id="gridSize">
+        <p>Taille de la grille (défaut: 16x16, min: 2x2, max: 50x50)</p>
+        <div class="sliderContainer">
+          <input class="slider" id="inputSize" type="range" required min="2" max="50" value="16"
+           onchange="updateValue(value)">
+        </div>
+        <p id="newValue">
+          <!--grid default value-->
+          16x16
+        </p>
+        <p>
+          <input type="submit" onsubmit="clearGrid()" value="Rafraichir la grille">
+        </p>
+      </form>
+      <form>
+        <p id="customColors">
+          Personnaliser une palette (avec le sélecteur ci-dessous):&nbsp;
+        </p>
+        <p>
+          <input type="color" id="colorPicker" onchange="getColors()">
+        </p>
+      </form>
+      <form id="paletteState">
+        <p>
+          <input id="buttonToggler" type="submit" onsubmit="clearColors()" value="Effacer la palette">
+        </p>
+      </form>
+  </div>
+  <div>
+    <table id="pixelCanvas"></table>
+  </div>
+  <script>
+    // variables
+    let inputSizeElRef = document.getElementById("inputSize")
+    let gridSizeElRef = document.getElementById("gridSize")
+    let pixelCanvasElRef = document.getElementById("pixelCanvas")
+    let customPalette = [] // starting empty
+
+    // events, functions
+
+    // triggered when the page is loaded or refreshed (onload)
+    function startApp() {
+        // hide the button
+        document.getElementById('buttonToggler').style.visibility='hidden'
+        
+        makeGrid()
+    }
+
+    // triggered when changing the slider to change the grid size (onchange)
+    function updateValue(inputSizeElRef) {
+        // update the display
+        document.getElementById('newValue').innerHTML = `${inputSizeElRef}x${inputSizeElRef}`
+        // refresh the grid
+        clearGrid()
+        makeGrid()
+    }
+
+    // triggered when pressing the button (onsubmit)
+    // to refresh the grid
+    // this function is different from the previous to include events
+    gridSize.onsubmit = function(event) {
+        // prevent other events
+        event.preventDefault()
+        // refresh the grid
+        clearGrid()
+        makeGrid()
+    }
+
+    // triggered when pressing the hidden/visible button (onsubmit)
+    paletteState.onsubmit = function(event) {
+        // prevent other events
+        event.preventDefault()
+        // clear the custom Palette
+        clearColors()
+    }
+
+    // triggered by other functions
+    // remove the table's first child
+    // pixelCanvasElRef is <table>
+    // pixelCanvasElRef.firstChild is <tbody> (followed by <tr>, then <td>)
+    // remove <tbody> from <table> to clear the grid 
+    function clearGrid() {
+        while (pixelCanvasElRef.firstChild) {
+        pixelCanvasElRef.removeChild(pixelCanvasElRef.firstChild) 
+        }
+    }
+
+    // triggered when picking colors (onchange)
+    function getColors(event){
+        // make the button visible
+        document.getElementById('buttonToggler').style.visibility='visible'
+        // whenever a color is selected, its value (hexdec code)...
+        let colorPickerElRef = document.getElementById('colorPicker').value
+        // ...is pushed or appended to the customPalette array
+        customPalette.push(colorPickerElRef)
+        // console checkpoint
+        console.log(customPalette)
+
+        // then, create a new element (<div>)
+        const newEl = document.createElement('div')
+        // add a class to that new element (class "colorScale" also exists in the CSS file)
+        newEl.classList.add("colorScale")
+        // target an element (id='customColors')
+        const parentNode = document.getElementById('customColors')
+        // create a string (a placeholder)
+        const stringEl = document.createTextNode(" ")
+        // append the new string (a placeholder) as a child of the new element (<div>)
+        newEl.appendChild(stringEl)
+        // append the new element (<div>) as a child of the targeted element (id='customColors') 
+        parentNode.appendChild(newEl)
+        // set the style (background color) of new element (<div>)
+        newEl.style.setProperty('background-color',`${colorPickerElRef}`)
+        // the remaining style is defined by the class "colorScale" in the CSS
+        
+        return customPalette
+    }
+
+    // triggered by other functions
+    function clearColors() {
+        // clear the array
+        customPalette = []
+        // console checkpoint
+        console.log(customPalette)
+
+        // hide the button
+        document.getElementById('buttonToggler').style.visibility='hidden'
+        // target an element (id='customColors')
+        const thisNode = document.getElementById('customColors')
+        // loop through each child of the target
+        // all the children (mostly <div>) except the first child (the string)
+        while (thisNode.hasChildNodes()) {
+          // when the number of child nodes
+          // amount to only 1 (string only, no more <div>), break the loop
+          if (thisNode.childNodes.length === 1) {
+            break
+          }
+          // if the loop is not broken
+          // remove the second item ([1] or a <div>)
+          // but never the first item ([0] or the string)
+          thisNode.removeChild(thisNode.childNodes[1])
+          // repeat...
+        }
+
+        return customPalette
+    }
+
+    // triggered by other functions
+    function makeGrid() {
+        // generate r rows and c cells in each row
+        for (let r=0; r < inputSizeElRef.value; r++) {
+        // add rows
+        const row = pixelCanvasElRef.insertRow(r)
+            for (let c=0; c < inputSizeElRef.value; c++){
+            // divide each row in cells
+            const cell = row.insertCell(c)
+        // then wait for events
+        // event for mouses
+        cell.addEventListener("mouseover", fillSquare)
+        // event for touchscreens (and mouses)
+        cell.addEventListener("click", fillSquare)
+            }
+        }
+    }
+
+    // triggered by an event listener
+    function fillSquare() {
+        // if array customPalette has at least one value...
+        if (customPalette.length > 0) {
+        // ...generate a, integer from 0 to 1 x number of elements in the array (length)
+        // for eg, an array of 5 items: 0 to 5 or 0, 1, 2, 3, 4
+        let choice = Math.floor(Math.random() * customPalette.length)
+        // extract the color from the array with the index = random integer
+        // for eg, if the random integer is 3, index 3
+        let color = customPalette[choice]
+        // apply the color to this (the square in the grid)
+        this.setAttribute("style", `background-color: ${color}`)
+        // else array customPalette is empty
+        } else {
+        // a string from 0 to F (hexadecimal sequence)
+        let makeColorCode = '0123456789ABCDEF'
+        // a starting character for a color code
+        let color = '#'
+        // generate 6 hexadec integers predeeded by the starting character
+        // for eg, #ff0055
+        for (let count = 0; count < 6; count++) {
+            color = color + makeColorCode[Math.floor(Math.random() * 16)]
+            // console checkpoint
+            console.log(color)
+        }
+        // apply the color to this (the square in the grid)
+        this.setAttribute("style", `background-color: ${color}`)
+        }
+    }
+  </script>
+</body>
+</html>

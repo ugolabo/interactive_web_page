@@ -1,0 +1,64 @@
+/* tags */
+body {
+    text-align: center;
+}
+
+table, tr, td {
+    border: 2px solid orangered;
+}
+
+table {
+    width: 400px;
+    height: 400px;
+    border-collapse: collapse;
+    margin: 40px auto;
+}
+
+input[type=number] {
+    width: 3em;
+    margin: 0 20px 0 20px;
+}
+
+input[type=submit] {
+    margin: 0 20px 0 20px;
+}
+
+/* classes */
+.mainTitle {
+    font-family: 'arial', sans-serif;
+    font-size: 2.5em;
+    margin: 0.5em;
+    color: orangered;
+}
+
+.sliderContainer {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.slider {
+    width: 300px;
+}
+
+.colorScale {
+    margin-left: auto;
+    margin-right: auto;
+    width: 25px;
+    height: 1em;
+    display: inline-block;
+    vertical-align: bottom;
+    border: 1px solid white;
+}
+
+/* media query */
+@media screen and (max-width: 480px) {
+    .mainTitle {
+        font-size: 1.3rem;
+        display: inline;
+    }
+
+    table {
+        width: 250px;
+        height: 250px;
+    }
+}
